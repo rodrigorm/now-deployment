@@ -10,7 +10,7 @@ jobs:
   angular:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
       - name: build
         run: |
           cd example/angular
@@ -23,7 +23,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           zeit-token: ${{ secrets.ZEIT_TOKEN }}
           now-org-id: ${{ secrets.NOW_ORG_ID }}
-          now-project-id: $$ {{ secrets.NOW_PROJECT_ID_ANGULAR }}
+          now-project-id: $ {{ secrets.NOW_PROJECT_ID_ANGULAR }}
           working-directory: example/angular/dist/angular
       - uses: ./
         id: now-deployment-production
@@ -32,6 +32,6 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           zeit-token: ${{ secrets.ZEIT_TOKEN }}
           now-org-id: ${{ secrets.NOW_ORG_ID }}
-          now-project-id: $$ {{ secrets.NOW_PROJECT_ID_ANGULAR }}
+          now-project-id: $ {{ secrets.NOW_PROJECT_ID_ANGULAR }}
           working-directory: example/angular/dist/angular
           now-args: '--prod '
