@@ -82,3 +82,8 @@ jobs:
           now-project-id: 'YOUR_PROJECT_ID' #Required 
           working-directory: ./sub-directory
 ```
+
+
+### Agnular Example
+
+See `example/angular/src/now.json` , 

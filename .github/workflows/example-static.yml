@@ -1,17 +1,17 @@
-name: production
+name: example - static
 on:
   push:
-    branches:
-      - master
+  #  branches:
+  #    - master
 
 jobs:
-  prod:
+  static:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
-      - uses: ./
+      - uses: amondnet/now-deployment@v1
         id: now-deployment
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           zeit-token: ${{ secrets.ZEIT_TOKEN }}
-          now-args: '--prod'
+          now-args: '--prod example/static'

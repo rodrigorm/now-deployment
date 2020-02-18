@@ -1,0 +1,22 @@
+name: example - angular
+on:
+  push:
+  #  branches:
+  #    - master
+
+jobs:
+  static:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: build
+        run: |
+          cd example/angular
+          npm install
+          npx ng build --prod
+      - uses: amondnet/now-deployment@v1
+        id: now-deployment
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          zeit-token: ${{ secrets.ZEIT_TOKEN }}
+          now-args: '--prod example/angular/dist/angular'
