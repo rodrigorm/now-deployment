@@ -86,4 +86,4 @@ jobs:
 
 ### Agnular Example
 
-See `example/angular/src/now.json` , 
+See [.github/workflow/example-angular.yml](/.github/workflows/example-angular.yml) , 
