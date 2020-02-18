@@ -15,4 +15,5 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           zeit-token: ${{ secrets.ZEIT_TOKEN }}
           github-comment: false
-          #ZEIT_TEAMID: amond
+          now-org-id: ${{ secrets.NOW_ORG_ID }}
+          now-project-id: $$ {{ secrets.NOW_PROJECT_ID_STATIC }}
