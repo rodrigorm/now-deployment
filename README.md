@@ -38,13 +38,35 @@ The url of deployment preview.
 
 ## Example Usage
 
-### now.json
+### Disable ZEIT Now for GitHub
+
+> The ZEIT Now for GitHub integration automatically deploys your GitHub projects with ZEIT Now, providing Preview Deployment URLs, and automatic Custom Domain updates.
+[link](https://zeit.co/docs/v2/git-integrations)
+
+We would like to to use `github actions` for build and deploy instead of `ZEIT Now`. 
+
+Set `github.enabled: false` in now.json
+
+```json
+{
+  "version": 2,
+  "public": false,
+  "github": {
+    "enabled": false
+  },
+  "builds": [
+    { "src": "./public/**", "use": "@now/static" }
+  ],
+  "routes": [
+    { "src": "/(.*)", "dest": "public/$1" }
+  ]
+}
+
 ```
-github.enabled: false
-```
-When set to false, ZEIT Now for GitHub will not deploy the given project regardless of the GitHub app being installed.
+When set to false, `ZEIT Now for GitHub` will not deploy the given project regardless of the GitHub app being installed.
 
 
+`now.json` Example:
 ```json
 {
   "name": "zeit-now-deployment",
@@ -93,6 +115,8 @@ Once set up, a new `.now` directory will be added to your directory. The `.now` 
 
 * This is a complete `.github/workflow/deploy.yml` example.
 
+Set the `now-project-id` and `now-org-id` you found above.
+
 ```yaml
 name: deploy website
 on: [pull_request]
@@ -107,8 +131,8 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }} #Optional 
           zeit-team-id: team_XXXXXXXXXXX #Optional 
           now-args: '--prod' #Optional
-          now-org-id: 'YOUR_ORG' #Required
-          now-project-id: 'YOUR_PROJECT_ID' #Required 
+          now-org-id: 'example_org_id' #Required
+          now-project-id: 'example_project_id' #Required 
           working-directory: ./sub-directory
 ```
 
