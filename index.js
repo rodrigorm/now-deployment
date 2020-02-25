@@ -39,6 +39,12 @@ async function run() {
   } else {
     core.info("comment : disabled");
   }
+  const pull = await octokit.pulls.get({
+    ...context.repo,
+    pull_number: context.payload.pull_request.number
+  })
+  core.info(pull)
+  core.info(`ref : ${context.payload.pull_request.html_url}`)
 }
 
 async function setEnv() {
@@ -100,9 +106,11 @@ async function nowDeploy() {
       `githubCommitRepo=${context.repo.repo}`,
       "-m",
       `githubCommitMessage=${commit}`
-    ],
-    options
-  );
+        "-m",
+        `githubCommitRef=${context.ref}`
+      ],
+      options
+    );
 
   return myOutput;
 }
