@@ -1,3 +1,4 @@
+const { stripIndents } = require("common-tags");
 const core = require("@actions/core");
 const github = require("@actions/github");
 const { execSync } = require("child_process");
@@ -8,6 +9,7 @@ const context = github.context;
 const zeitToken = core.getInput("zeit-token");
 const nowArgs = core.getInput("now-args");
 const githubToken = core.getInput("github-token");
+const githubComment = core.getInput("github-comment") === "true";
 const workingDirectory = core.getInput("working-directory");
 const nowOrgId = core.getInput("now-org-id");
 const nowProjectId = core.getInput("now-project-id");
@@ -19,13 +21,23 @@ if (githubToken) {
 
 async function run() {
   await setEnv();
-
   const deploymentUrl = await nowDeploy();
   if (deploymentUrl) {
     core.info("set preview-url output");
     core.setOutput("preview-url", `https://${deploymentUrl}`);
   } else {
     core.warning("get preview-url error");
+  }
+  if (githubComment && githubToken) {
+    if (context.issue.number) {
+      core.info("this is related issue or pull_request ");
+      await createCommentOnPullRequest(deploymentCommit, deploymentUrl);
+    } else if (context.eventName === "push") {
+      core.info("this is push event");
+      await createCommentOnCommit(deploymentCommit, deploymentUrl);
+    }
+  } else {
+    core.info("comment : disabled");
   }
 }
 
@@ -93,6 +105,90 @@ async function nowDeploy() {
   );
 
   return myOutput;
+}
+
+async function findPreviousComment(text) {
+  if (!octokit) {
+    return null;
+  }
+  core.info("find comment");
+  const { data: comments } = await octokit.repos.listCommentsForCommit({
+    ...context.repo,
+    commit_sha: context.sha
+  });
+
+  const zeitPreviewURLComment = comments.find(comment =>
+    comment.body.startsWith(text)
+  );
+  if (zeitPreviewURLComment) {
+    core.info("previous comment found");
+    return zeitPreviewURLComment.id;
+  } else {
+    core.info("previous comment not found");
+    return null;
+  }
+}
+
+async function createCommentOnCommit(deploymentCommit, deploymentUrl) {
+  if (!octokit) {
+    return;
+  }
+  const commentId = await findPreviousComment(
+    "Deploy preview for _website_ ready!"
+  );
+
+  const commentBody = stripIndents`
+    Deploy preview for _website_ ready!
+
+    Built with commit ${deploymentCommit}
+
+    https://${deploymentUrl}
+  `;
+
+  if (commentId) {
+    await octokit.repos.updateCommitComment({
+      ...context.repo,
+      comment_id: commentId,
+      body: commentBody
+    });
+  } else {
+    await octokit.repos.createCommitComment({
+      ...context.repo,
+      commit_sha: context.sha,
+      body: commentBody
+    });
+  }
+}
+
+async function createCommentOnPullRequest(deploymentCommit, deploymentUrl) {
+  if (!octokit) {
+    return;
+  }
+  const commentId = await findPreviousComment(
+    "Deploy preview for _website_ ready!"
+  );
+
+  const commentBody = stripIndents`
+    Deploy preview for _website_ ready!
+
+    Built with commit ${deploymentCommit}
+
+    https://${deploymentUrl}
+  `;
+
+  if (commentId) {
+    await octokit.issues.updateComment({
+      ...context.repo,
+      comment_id: commentId,
+      body: commentBody
+    });
+  } else {
+    await octokit.issues.createComment({
+      ...context.repo,
+      issue_number: context.issue.number,
+      body: commentBody
+    });
+  }
 }
 
 run().catch(error => {
