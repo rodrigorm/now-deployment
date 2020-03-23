@@ -116,7 +116,7 @@ async function nowDeploy() {
         "-m",
         `githubCommitRepo=${context.repo.repo}`,
         "-m",
-        `githubCommitMessage=${commit}`,
+        `githubCommitMessage=${commit}`
       ],
       options
     )
@@ -149,6 +149,8 @@ async function findPreviewUrl() {
   let deploymentUrl;
   let deploymentCommit;
 
+  console.log("fpu context.sha", context.sha);
+
   const {
     data: {
       deployments: [commitDeployment]
@@ -160,6 +162,7 @@ async function findPreviewUrl() {
   });
 
   if (commitDeployment) {
+    console.log("fpu commitDeployment", JSON.stringify(commitDeployment));
     deploymentUrl = commitDeployment.url;
     deploymentCommit = commitDeployment.meta.githubCommitSha;
   } else {
@@ -172,6 +175,11 @@ async function findPreviewUrl() {
         "meta-githubCommitRef": context.ref
       }
     });
+
+    console.log(
+      "fpu lastBranchDeployment",
+      JSON.stringify(lastBranchDeployment)
+    );
 
     if (lastBranchDeployment) {
       deploymentUrl = lastBranchDeployment.url;
@@ -186,6 +194,8 @@ async function findPreviewUrl() {
           limit: 1
         }
       });
+
+      console.log("fpu lastDeployment", JSON.stringify(lastDeployment));
 
       if (lastDeployment) {
         deploymentUrl = lastDeployment.url;
