@@ -34,7 +34,16 @@ if (githubToken) {
 
 async function run() {
   await setEnv();
-  await nowDeploy();
+
+  const deploymentUrl = await nowDeploy();
+  if (deploymentUrl) {
+    core.info("set preview-url output");
+    core.setOutput("preview-url", `https://${deploymentUrl}`);
+  } else {
+    core.warning("get preview-url error");
+  }
+  return;
+
   const deployment = await findPreviewUrl();
   const deploymentUrl = deployment.deploymentUrl;
   const deploymentCommit = deployment.deploymentCommit;
@@ -91,36 +100,42 @@ async function nowDeploy() {
     options.cwd = workingDirectory;
   }
 
-  return await exec
-    .exec(
-      "npx",
-      [
-        "now",
-        ...nowArgs.split(/ +/),
-        "-t",
-        zeitToken,
-        "-m",
-        `githubCommitSha=${context.sha}`,
-        "-m",
-        `githubCommitAuthorName=${context.actor}`,
-        "-m",
-        `githubCommitAuthorLogin=${context.actor}`,
-        "-m",
-        "githubDeployment=1",
-        "-m",
-        `githubOrg=${context.repo.owner}`,
-        "-m",
-        `githubRepo=${context.repo.repo}`,
-        "-m",
-        `githubCommitOrg=${context.repo.owner}`,
-        "-m",
-        `githubCommitRepo=${context.repo.repo}`,
-        "-m",
-        `githubCommitMessage=${commit}`
-      ],
-      options
-    )
-    .then(() => {});
+  await exec.exec(
+    "npx",
+    [
+      "now",
+      ...nowArgs.split(/ +/),
+      "-t",
+      zeitToken,
+      "-m",
+      `githubCommitSha=${context.sha}`,
+      "-m",
+      `githubCommitAuthorName=${context.actor}`,
+      "-m",
+      `githubCommitAuthorLogin=${context.actor}`,
+      "-m",
+      "githubDeployment=1",
+      "-m",
+      `githubOrg=${context.repo.owner}`,
+      "-m",
+      `githubRepo=${context.repo.repo}`,
+      "-m",
+      `githubCommitOrg=${context.repo.owner}`,
+      "-m",
+      `githubCommitRepo=${context.repo.repo}`,
+      "-m",
+      `githubCommitMessage=${commit}`
+    ],
+    options
+  );
+
+  const [first] = myOutput.split("- Queued");
+  const groups = first.match(/\n(.+)/g);
+  if (groups) {
+    return groups[groups.length - 1];
+  }
+
+  return {};
 }
 
 async function findPreviousComment(text) {
