@@ -24,7 +24,7 @@ async function run() {
   const deploymentUrl = await nowDeploy();
   if (deploymentUrl) {
     core.info("set preview-url output");
-    core.setOutput("preview-url", `https://${deploymentUrl}`);
+    core.setOutput("preview-url", deploymentUrl);
   } else {
     core.warning("get preview-url error");
   }
