@@ -92,8 +92,17 @@ async function nowDeploy() {
     options
   );
 
-  const [first] = myOutput.split("- Queued");
+  console.log("myOutput");
+  console.log(myOutput);
+
+  const first = myOutput.split("- Queued")[0];
+
+  console.log("first");
+  console.log(first);
   const groups = first.match(/\n(.+)/g);
+
+  console.log("groups");
+  console.log(groups);
   if (groups) {
     return groups[groups.length - 1];
   }
