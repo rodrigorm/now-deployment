@@ -21,7 +21,8 @@
     "@actions/github": "^2.1.1",
     "axios": "~0.18.1",
     "common-tags": "^1.8.0",
-    "now": "^17.0.3"
+    "now": "^17.0.3",
+    "@octokit/webhooks": "latest"
   },
   "devDependencies": {
     "prettier": "1.19.1"
