@@ -17,6 +17,7 @@ jobs:
           github-comment: false
           now-org-id: ${{ secrets.NOW_ORG_ID }}
           now-project-id: ${{ secrets.NOW_PROJECT_ID_STATIC }}
+          zeit-team-id: test
       - name: preview-url
         run: |
           echo ${{ steps.now-deployment.outputs.preview-url }}
