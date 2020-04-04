@@ -46,10 +46,10 @@ async function run() {
     core.debug(`The head sha is: ${pullRequestPayload.pull_request.head.sha}`);
 
     if ( octokit ) {
-      const { data: message } = await octokit.git.getCommit({
+      const { data: commitData } = await octokit.git.getCommit({
         ...context.repo, commit_sha: sha
       });
-      commit = message;
+      commit = commitData.message;
       core.debug(`The head commit is: ${commit}`);
     }
   }
