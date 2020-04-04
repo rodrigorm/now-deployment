@@ -3,6 +3,7 @@ const core = require("@actions/core");
 const github = require("@actions/github");
 const { execSync } = require("child_process");
 const exec = require("@actions/exec");
+const Webhooks = require("@octokit/webhooks");
 
 const context = github.context;
 
@@ -28,24 +29,26 @@ async function run() {
   core.debug(`workflow : ${context.workflow}`);
 
   await setEnv();
-  let pull;
   let ref = context.ref;
   let sha = context.sha;
   let commit = execSync("git log -1 --pretty=format:%B")
-      .toString()
-      .trim();
-  if (octokit) {
-    if ( context.eventName === "pull_request" ) {
-      pull = await octokit.pulls.get({
-        ...context.repo, pull_number: context.payload.pull_request.number
-      });
-      ref = pull.head.ref;
-      sha = pull.head.sha;
+    .toString()
+    .trim();
+  if (github.context.eventName === 'push') {
+    const pushPayload = github.context.payload as Webhooks.WebhookPayloadPush;
+    core.debug(`The head commit is: ${pushPayload.head_commit}`);
+  } else if ( github.context.eventName === 'pull_request') {
+    const pullRequestPayload = github.context.payload as Webhooks.WebhookPayloadPullRequest;
+    ref = pullRequestPayload.head.ref;
+    sha = pullRequestPayload.head.sha;
+    if ( octokit ) {
       commit = await octokit.commit.get({
         ...context.repo, commit_sha: sha
       });
+      core.debug(`The head commit is: ${pullRequestPayload.pull_request.head.ref}`);
     }
   }
+
   const deploymentUrl = await nowDeploy(ref, commit);
   if (deploymentUrl) {
     core.info("set preview-url output");
@@ -65,11 +68,11 @@ async function run() {
     core.info("comment : disabled");
   }
 
-
-  if ( octokit ) {
-    core.debug('octokit');
+  if (octokit) {
+    core.debug("octokit");
     const pull = await octokit.pulls.get({
-      ...context.repo, pull_number: context.payload.pull_request.number
+      ...context.repo,
+      pull_number: context.payload.pull_request.number
     });
     if (pull) {
       core.debug(JSON.stringify(pull));
@@ -91,7 +94,6 @@ async function setEnv() {
 }
 
 async function nowDeploy(ref, commit) {
-
   let myOutput = "";
   let myError = "";
   const options = {};
