@@ -26,10 +26,10 @@ async function run() {
   core.debug(`actor : ${context.actor}`);
   core.debug(`sha : ${context.sha}`);
   core.debug(`workflow : ${context.workflow}`);
-
-  await setEnv();
   let ref = context.ref;
   let sha = context.sha;
+  await setEnv();
+
   let commit = execSync("git log -1 --pretty=format:%B")
     .toString()
     .trim();
@@ -38,6 +38,8 @@ async function run() {
     core.debug(`The head commit is: ${pushPayload.head_commit}`);
   } else if ( github.context.eventName === 'pull_request') {
     const pullRequestPayload = github.context.payload;
+    core.debug(`head : ${pullRequestPayload.head}`);
+
     ref = pullRequestPayload.head.ref;
     sha = pullRequestPayload.head.sha;
     if ( octokit ) {
