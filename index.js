@@ -38,10 +38,10 @@ async function run() {
     core.debug(`The head commit is: ${pushPayload.head_commit}`);
   } else if ( github.context.eventName === 'pull_request') {
     const pullRequestPayload = github.context.payload;
-    core.debug(`head : ${pullRequestPayload.head}`);
+    core.debug(`head : ${pullRequestPayload.pull_request.head}`);
 
-    ref = pullRequestPayload.head.ref;
-    sha = pullRequestPayload.head.sha;
+    ref = pullRequestPayload.pull_request.head.ref;
+    sha = pullRequestPayload.pull_request.head.sha;
     if ( octokit ) {
       commit = await octokit.commit.get({
         ...context.repo, commit_sha: sha
