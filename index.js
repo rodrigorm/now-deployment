@@ -28,6 +28,7 @@ async function run() {
   } else {
     core.warning("get preview-url error");
   }
+  const commit = context.ref;
   if (githubComment && githubToken) {
     if (context.issue.number) {
       core.info("this is related issue or pull_request ");
@@ -40,6 +41,8 @@ async function run() {
     core.info("comment : disabled");
   }
   if ( octokit ) {
+    core.debug('octokie');
+
     const pull = await octokit.pulls.get({
       ...context.repo, pull_number: context.payload.pull_request.number
     });
@@ -188,11 +191,11 @@ async function createCommentOnPullRequest(deploymentCommit, deploymentUrl) {
   );
 
   const commentBody = stripIndents`
-    Deploy preview for _website_ ready!
+    This pull request is being automatically deployed with [now-deployment](https://github.com/amondnet/now-deployment)
 
     Built with commit ${deploymentCommit}
 
-    https://${deploymentUrl}
+    ✅ Preview: ${deploymentUrl}
   `;
 
   if (commentId) {
