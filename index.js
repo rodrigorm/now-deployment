@@ -32,10 +32,10 @@ async function run() {
   if (githubComment && githubToken) {
     if (context.issue.number) {
       core.info("this is related issue or pull_request ");
-      await createCommentOnPullRequest(deploymentCommit, deploymentUrl);
+      await createCommentOnPullRequest(commit, deploymentUrl);
     } else if (context.eventName === "push") {
       core.info("this is push event");
-      await createCommentOnCommit(deploymentCommit, deploymentUrl);
+      await createCommentOnCommit(commit, deploymentUrl);
     }
   } else {
     core.info("comment : disabled");
