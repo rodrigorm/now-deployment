@@ -42,6 +42,9 @@ async function run() {
 
     ref = pullRequestPayload.pull_request.head.ref;
     sha = pullRequestPayload.pull_request.head.sha;
+    core.debug(`The head ref is: ${pullRequestPayload.pull_request.head.ref}`);
+    core.debug(`The head sha is: ${pullRequestPayload.pull_request.head.sha}`);
+
     if ( octokit ) {
       commit = await octokit.git.getCommit({
         ...context.repo, commit_sha: sha
