@@ -48,8 +48,8 @@ async function run() {
     if ( octokit ) {
       commit = await octokit.git.getCommit({
         ...context.repo, commit_sha: sha
-      }).message;
-      core.debug(`The head commit is: ${pullRequestPayload.pull_request.head.ref}`);
+      }).data.message;
+      core.debug(`The head commit is: ${commit}`);
     }
   }
 
