@@ -39,12 +39,15 @@ async function run() {
   } else {
     core.info("comment : disabled");
   }
-  const pull = await octokit.pulls.get({
-    ...context.repo,
-    pull_number: context.payload.pull_request.number
-  })
-  core.info(pull)
-  core.info(`ref : ${context.payload.pull_request.html_url}`)
+  if ( octokit ) {
+    const pull = await octokit.pulls.get({
+      ...context.repo, pull_number: context.payload.pull_request.number
+    });
+    if (pull) {
+      core.debug(JSON.stringify(pull));
+      core.debug(`ref : ${context.payload.pull_request.html_url}`);
+    }
+  }
 }
 
 async function setEnv() {
@@ -80,7 +83,15 @@ async function nowDeploy() {
   if (workingDirectory) {
     options.cwd = workingDirectory;
   }
-
+  let commitRef = context.ref;
+  if (context.eventName === "pull_request") {
+    //commitRef = context.payload.pull_request.number;
+    //octokit.
+  }
+  let commitMessage = commit;
+  if ( context.eventName === "pull_request") {
+    //commitMessage =
+  }
   await exec.exec(
     "npx",
     [
@@ -107,10 +118,10 @@ async function nowDeploy() {
       "-m",
       `githubCommitMessage=${commit}`,
       "-m",
-      `githubCommitRef=${context.ref}`
-      ],
-      options
-    );
+      `githubCommitRef=${commitRef}`
+    ],
+    options
+  );
 
   return myOutput;
 }
