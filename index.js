@@ -35,10 +35,10 @@ async function run() {
     .toString()
     .trim();
   if (github.context.eventName === 'push') {
-    const pushPayload = github.context.payload as Webhooks.WebhookPayloadPush;
+    const pushPayload = github.context.payload;
     core.debug(`The head commit is: ${pushPayload.head_commit}`);
   } else if ( github.context.eventName === 'pull_request') {
-    const pullRequestPayload = github.context.payload as Webhooks.WebhookPayloadPullRequest;
+    const pullRequestPayload = github.context.payload;
     ref = pullRequestPayload.head.ref;
     sha = pullRequestPayload.head.sha;
     if ( octokit ) {
