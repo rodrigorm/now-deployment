@@ -64,25 +64,13 @@ async function run() {
   if (githubComment && githubToken) {
     if (context.issue.number) {
       core.info("this is related issue or pull_request ");
-      await createCommentOnPullRequest(ref, deploymentUrl);
+      await createCommentOnPullRequest(sha, deploymentUrl);
     } else if (context.eventName === "push") {
       core.info("this is push event");
-      await createCommentOnCommit(ref, deploymentUrl);
+      await createCommentOnCommit(sha, deploymentUrl);
     }
   } else {
     core.info("comment : disabled");
-  }
-
-  if (octokit) {
-    core.debug("octokit");
-    const pull = await octokit.pulls.get({
-      ...context.repo,
-      pull_number: context.payload.pull_request.number
-    });
-    if (pull) {
-      core.debug(JSON.stringify(pull));
-      core.debug(`ref : ${context.payload.pull_request.html_url}`);
-    }
   }
 }
 
@@ -208,7 +196,7 @@ async function createCommentOnPullRequest(deploymentCommit, deploymentUrl) {
     return;
   }
   const commentId = await findPreviousComment(
-    "Deploy preview for _website_ ready!"
+    "This pull request is being automatically deployed with"
   );
 
   const commentBody = stripIndents`
