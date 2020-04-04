@@ -20,6 +20,13 @@ if (githubToken) {
 }
 
 async function run() {
+  core.debug(`action : ${context.action}`);
+  core.debug(`ref : ${context.ref}`);
+  core.debug(`eventName : ${context.eventName}`);
+  core.debug(`actor : ${context.actor}`);
+  core.debug(`sha : ${context.sha}`);
+  core.debug(`workflow : ${context.workflow}`);
+  
   await setEnv();
   const deploymentUrl = await nowDeploy();
   if (deploymentUrl) {
@@ -40,7 +47,7 @@ async function run() {
   } else {
     core.info("comment : disabled");
   }
-  core.debug(`action : ${context.action}`);
+
 
   if ( octokit ) {
     core.debug('octokit');
