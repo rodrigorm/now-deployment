@@ -26,23 +26,40 @@ async function run() {
   core.debug(`actor : ${context.actor}`);
   core.debug(`sha : ${context.sha}`);
   core.debug(`workflow : ${context.workflow}`);
-  
+
   await setEnv();
-  const deploymentUrl = await nowDeploy();
+  let pull;
+  let ref = context.ref;
+  let sha = context.sha;
+  let commit = execSync("git log -1 --pretty=format:%B")
+      .toString()
+      .trim();
+  if (octokit) {
+    if ( context.eventName === "pull_request" ) {
+      pull = await octokit.pulls.get({
+        ...context.repo, pull_number: context.payload.pull_request.number
+      });
+      ref = pull.head.ref;
+      sha = pull.head.sha;
+      commit = await octokit.commit.get({
+        ...context.repo, commit_sha: sha
+      });
+    }
+  }
+  const deploymentUrl = await nowDeploy(ref, commit);
   if (deploymentUrl) {
     core.info("set preview-url output");
     core.setOutput("preview-url", deploymentUrl);
   } else {
     core.warning("get preview-url error");
   }
-  const commit = context.ref;
   if (githubComment && githubToken) {
     if (context.issue.number) {
       core.info("this is related issue or pull_request ");
-      await createCommentOnPullRequest(commit, deploymentUrl);
+      await createCommentOnPullRequest(ref, deploymentUrl);
     } else if (context.eventName === "push") {
       core.info("this is push event");
-      await createCommentOnCommit(commit, deploymentUrl);
+      await createCommentOnCommit(ref, deploymentUrl);
     }
   } else {
     core.info("comment : disabled");
@@ -73,10 +90,7 @@ async function setEnv() {
   }
 }
 
-async function nowDeploy(pullRequest) {
-  const commit = execSync("git log -1 --pretty=format:%B")
-    .toString()
-    .trim();
+async function nowDeploy(ref, commit) {
 
   let myOutput = "";
   let myError = "";
@@ -94,15 +108,7 @@ async function nowDeploy(pullRequest) {
   if (workingDirectory) {
     options.cwd = workingDirectory;
   }
-  let commitRef = context.ref;
-  if (pullRequest) {
-    core.debug('this is pullrequest');
-    commitRef = pullRequest.base.ref;
-  }
-  let commitMessage = commit;
-  if ( pullRequest) {
-    //commitMessage =
-  }
+
   await exec.exec(
     "npx",
     [
@@ -129,7 +135,7 @@ async function nowDeploy(pullRequest) {
       "-m",
       `githubCommitMessage=${commit}`,
       "-m",
-      `githubCommitRef=${commitRef}`
+      `githubCommitRef=${ref}`
     ],
     options
   );
